@@ -1,0 +1,100 @@
+import time
+INPUT_STR = 'This is huffman encoding'
+
+
+def timer(func):
+    def wrapper(*args, **kwargs):
+        print("information of current interation {}".format(
+            [arg for arg in args]))
+        before = time.time()
+        value = func(*args, **kwargs)
+        print("That took:", time.time() - before, "seconds to run")
+        return value
+    return wrapper
+
+
+class Node():
+    def __init__(self, char, freq, left=None, right=None):
+
+        self.freq = freq
+        self.left = left
+        self.right = right
+        self.char = char
+        self.huff = ''
+
+
+def build_dict(INPUT_STR):
+    freq_dict = {}
+    for char in INPUT_STR:
+        if not char in freq_dict:
+            freq_dict[char] = 0
+        freq_dict[char] += 1
+    return freq_dict
+
+
+def create_tree():
+    nodes = []
+    freq_dict = build_dict(INPUT_STR)
+    for char in freq_dict:
+        newnode = Node(str(char), freq_dict[char])
+        nodes.append(newnode)
+    while len(nodes) > 1:
+        nodes = sorted(nodes, key=lambda a: a.freq)
+        left = nodes[0]
+        right = nodes[1]
+
+        left.huff = 0
+        right.huff = 1
+
+        newnode = Node(left.char + right.char, left.freq +
+                       right.freq, left=left, right=right)
+        nodes.append(newnode)
+        nodes.remove(left)
+        nodes.remove(right)
+    return nodes
+
+
+def encode_chars(node, val=''):
+    value = val + str(node.huff)
+    if (node.left):
+        encode_chars(node.left, value)
+    if (node.right):
+        encode_chars(node.right, value)
+
+    if not node.left and not node.right:
+        char = str(node.char)
+        huff = str(value)
+        encode_table[char] = value
+
+
+def huffman_encode():
+    tree = create_tree()[0]
+    encode_chars(tree)
+    encoded_str = ''
+    for char in INPUT_STR:
+        encoded_str += encode_table[char]
+    return encoded_str
+
+
+def huffman_decode(encodedstr, encode_table):
+    char = ''
+    decoded_string = ''
+    for bit in encodedstr:
+        char = char + bit
+        for value in encode_table:
+            if encode_table[value] == char:
+                decoded_string = decoded_string + value
+                char = ''
+            else:
+                pass
+    return decoded_string
+
+
+encode_table = {}
+frequency = build_dict(INPUT_STR)
+encoded = huffman_encode()
+decoded = huffman_decode(huffman_encode(), encode_table)
+print("Frequency Dict", frequency)
+print("Encode Table:", encode_table)
+print("Encoded String : ", encoded)
+print("Decoded String : ", decoded)
